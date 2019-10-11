@@ -1,0 +1,83 @@
+<!doctype html>
+<html>
+<head>
+    <style>
+        .bar {
+            fill: steelblue;
+        }
+    </style>
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <title>bar chart</title>
+</head>
+<body>
+<svg width="600" height="500"></svg>
+<script>
+var svg = d3.select("svg"),
+            margin = 200,
+            width = svg.attr("width") - margin,
+            height = svg.attr("height") - margin
+
+
+var xScale = d3.scaleBand().range([0, width]).padding(0.4),
+            yScale = d3.scaleLinear().range([height, 0]);
+
+
+
+var g = svg.append("g")
+            .attr("transform", "translate(" + 100 + "," + 100 + ")");
+
+    d3.csv("data.csv", function(error, data) {
+        if (error) {
+            throw error;
+        }
+
+        
+
+        xScale.domain(data.map(function(d) { return d.year; }));
+        yScale.domain([0, d3.max(data, function(d) { return parseInt(d.fulltime_women_applied.replace(',','')); })]);
+
+        g.append("g")
+         .attr("transform", "translate(0," + height + ")")
+         .call(d3.axisBottom(xScale));
+
+        g.append("g")
+         .call(d3.axisLeft(yScale).tickFormat(function(d){
+             return  d;
+         }).ticks(10));
+
+         g.selectAll(".bar")
+         .data(data)
+         .enter().append("rect")
+         .attr("class", "bar")
+         .attr("x", function(d) { return xScale(d.year); })
+         .attr("y", function(d) {  return (yScale(parseInt(d.fulltime_women_applied.replace(',','')))); })
+         .attr("width", xScale.bandwidth())
+         .attr("height", function(d) { return height - (yScale(parseInt(d.fulltime_women_applied.replace(',','')))); });
+
+        g.append("text")
+        .attr("x", (width / 2))
+        .attr("y", 0 - (margin.top / 2))
+        .attr("text-anchor", "middle")
+        .style("font-size", "12px")
+        .style("text-decoration", "underline")
+        .text("women_applied vs year");
+
+        svg.append("text")
+        .attr("class", "x label")
+        .attr("text-anchor", "end")
+        .attr("x", width)
+        .attr("y", height+140 )
+        .text("year");
+
+        svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("num of women");
+        
+    });
+</script>
+</body>
+</html>
